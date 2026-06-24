@@ -212,24 +212,20 @@ async function playNextQueueItem() {
   const currentQueuedTrack = queueItems[0];
   const nextQueuedTrack = queueItems[1];
 
+  if (!nextQueuedTrack) {
+    queueItems = [currentQueuedTrack];
+    broadcastQueue(true);
+    await playTrack(currentQueuedTrack.playId);
+    return refreshPlayerSnapshot(350);
+  }
+
   if (repeatEnabled) {
-    queueItems = nextQueuedTrack ? [...queueItems.slice(1), currentQueuedTrack] : [currentQueuedTrack];
+    queueItems = [...queueItems.slice(1), currentQueuedTrack];
   } else {
     queueItems = queueItems.slice(1);
   }
 
   broadcastQueue(true);
-
-  if (!nextQueuedTrack) {
-    if (repeatEnabled) {
-      await playTrack(currentQueuedTrack.playId);
-    } else {
-      await nextTrack();
-    }
-    const snapshot = await refreshPlayerSnapshot(350);
-    setCurrentTrackFromSnapshot(snapshot);
-    return snapshot;
-  }
 
   await playTrack(nextQueuedTrack.playId);
   return refreshPlayerSnapshot(350);
