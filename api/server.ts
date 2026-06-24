@@ -201,6 +201,13 @@ async function playQueueItem(item: QueueItem) {
   return refreshPlayerSnapshot(350);
 }
 
+async function restartQueueItem(item: QueueItem) {
+  await playTrack(item.playId);
+  await seekPlayback(0);
+  await resumePlayback();
+  return refreshPlayerSnapshot(350);
+}
+
 async function playNextQueueItem() {
   if (!queueItems.length) {
     await nextTrack();
@@ -215,8 +222,7 @@ async function playNextQueueItem() {
   if (!nextQueuedTrack) {
     queueItems = [currentQueuedTrack];
     broadcastQueue(true);
-    await playTrack(currentQueuedTrack.playId);
-    return refreshPlayerSnapshot(350);
+    return restartQueueItem(currentQueuedTrack);
   }
 
   if (repeatEnabled) {
@@ -254,7 +260,7 @@ function stoppedAtEnd(previousSnapshot: PlayerSnapshot, nextSnapshot: PlayerSnap
 }
 
 async function maybePlayNextQueuedTrack(previousSnapshot: PlayerSnapshot, nextSnapshot: PlayerSnapshot) {
-  if (queueItems.length < 2 || !stoppedAtEnd(previousSnapshot, nextSnapshot)) {
+  if (!queueItems.length || !stoppedAtEnd(previousSnapshot, nextSnapshot)) {
     return nextSnapshot;
   }
 
