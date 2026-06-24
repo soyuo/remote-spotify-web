@@ -674,6 +674,19 @@ input {
   }
 }
 
+@keyframes player-repeat-halo {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.78);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
 .player-bar {
   align-items: center;
   background: #0d0d0f;
@@ -820,9 +833,37 @@ input {
   color: #ffffff;
 }
 
+.player-repeat-button {
+  position: relative;
+}
+
+.player-repeat-button::before {
+  background: radial-gradient(circle, rgba(74, 163, 255, 0.52) 0%, rgba(74, 163, 255, 0.2) 42%, transparent 72%);
+  border-radius: 50%;
+  content: "";
+  inset: -8px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: scale(0.72);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.player-repeat-button svg {
+  position: relative;
+  z-index: 1;
+}
+
 .player-repeat-button.is-active {
   animation: player-repeat-glow 1.15s ease-in-out infinite;
   color: #4aa3ff;
+}
+
+.player-repeat-button.is-active::before {
+  animation: player-repeat-halo 1.15s ease-in-out infinite;
+  opacity: 1;
 }
 
 .player-repeat-button.is-active:hover {
