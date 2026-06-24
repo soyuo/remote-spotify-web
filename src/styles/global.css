@@ -132,7 +132,27 @@ input {
   gap: 8px;
   max-height: calc(100vh - 190px);
   overflow-y: auto;
-  padding-right: 0;
+  padding-right: 6px;
+  scrollbar-color: #5d5d65 transparent;
+  scrollbar-width: thin;
+}
+
+.queue-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.queue-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.queue-list::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: 1px solid #5d5d65;
+  border-radius: 999px;
+}
+
+.queue-list::-webkit-scrollbar-thumb:hover {
+  border-color: #8a8a92;
 }
 
 .queue-item {
@@ -1111,7 +1131,7 @@ input {
 
   .queue-list {
     max-height: calc(100vh - 180px);
-    padding-right: 0;
+    padding-right: 6px;
   }
 
   .search-screen h1 {
@@ -1240,19 +1260,19 @@ input {
   }
 
   .player-aux-button:first-child {
-    left: calc(50% - 86px);
+    left: calc(50% - 72px);
   }
 
   .player-previous-button {
-    left: calc(50% - 52px);
+    left: calc(50% - 44px);
   }
 
   .player-next-button {
-    right: calc(50% - 52px);
+    right: calc(50% - 44px);
   }
 
   .player-aux-button:last-child {
-    right: calc(50% - 86px);
+    right: calc(50% - 72px);
   }
 
   .player-play-button {
@@ -1307,7 +1327,7 @@ input {
 
   .player-track-info {
     gap: 10px;
-    max-width: calc(50vw - 48px);
+    max-width: calc(50vw - 62px);
   }
 
   .player-artwork {
@@ -1325,19 +1345,19 @@ input {
   }
 
   .player-aux-button:first-child {
-    left: calc(50% - 78px);
+    left: calc(50% - 66px);
   }
 
   .player-previous-button {
-    left: calc(50% - 48px);
+    left: calc(50% - 40px);
   }
 
   .player-next-button {
-    right: calc(50% - 48px);
+    right: calc(50% - 40px);
   }
 
   .player-aux-button:last-child {
-    right: calc(50% - 78px);
+    right: calc(50% - 66px);
   }
 
   .player-volume-control {
