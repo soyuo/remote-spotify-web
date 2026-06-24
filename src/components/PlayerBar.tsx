@@ -13,9 +13,11 @@ export type PlayerTrack = {
 
 type PlayerBarProps = {
   isPlaying?: boolean;
+  isShuffling?: boolean;
   onNext?: () => void;
   onPrevious?: () => void;
   onSeek?: (positionMs: number) => void;
+  onShuffle?: () => void;
   onToggle?: () => void;
   onVolumeChange?: (value: number) => void;
   progressMs?: number;
@@ -144,9 +146,11 @@ function VolumeIcon() {
 
 export function PlayerBar({
   isPlaying = false,
+  isShuffling = false,
   onNext,
   onPrevious,
   onSeek,
+  onShuffle,
   onToggle,
   onVolumeChange,
   progressMs = 0,
@@ -215,7 +219,12 @@ export function PlayerBar({
 
       <div className="player-controls" aria-label="재생 컨트롤">
         <div className="player-buttons">
-          <IconButton label="셔플" className="player-control-button player-aux-button" disabled>
+          <IconButton
+            label="셔플"
+            className={`player-control-button player-aux-button player-shuffle-button${isShuffling ? " is-loading" : ""}`}
+            disabled={isShuffling}
+            onClick={onShuffle}
+          >
             <ShuffleIcon />
           </IconButton>
           <IconButton label="이전 곡" className="player-control-button player-previous-button" onClick={onPrevious}>

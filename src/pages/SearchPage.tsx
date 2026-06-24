@@ -80,6 +80,7 @@ export function SearchPage() {
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [searchError, setSearchError] = useState("");
   const [playError, setPlayError] = useState("");
+  const [isShuffling, setIsShuffling] = useState(false);
   const [player, setPlayer] = useState<PlayerResponse>(idlePlayer);
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
   const searchTimerRef = useRef<number | null>(null);
@@ -338,6 +339,29 @@ export function SearchPage() {
     postPlayerAction("/api/play/next");
   }
 
+  async function handleShuffle() {
+    setPlayError("");
+    setIsShuffling(true);
+
+    try {
+      const response = await fetch("/api/shuffle", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("shuffle request failed");
+      }
+
+      const data = (await response.json()) as QueueResponse;
+      setQueueItems(data.items);
+    } catch (error) {
+      console.error(error);
+      setPlayError("재생 목록을 섞지 못했어요. 잠시 뒤 다시 시도해 주세요.");
+    } finally {
+      setIsShuffling(false);
+    }
+  }
+
   function handleSeek(positionMs: number) {
     setPlayError("");
 
@@ -462,9 +486,11 @@ export function SearchPage() {
       </section>
       <PlayerBar
         isPlaying={player.isPlaying}
+        isShuffling={isShuffling}
         onNext={handleNext}
         onPrevious={handlePrevious}
         onSeek={handleSeek}
+        onShuffle={handleShuffle}
         onToggle={handleToggle}
         onVolumeChange={handleVolumeChange}
         progressMs={player.progressMs}

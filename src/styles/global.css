@@ -648,6 +648,19 @@ input {
   }
 }
 
+@keyframes player-control-glow {
+  0%,
+  100% {
+    color: #8a8a92;
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+
+  50% {
+    color: #ffffff;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.72));
+  }
+}
+
 .player-bar {
   align-items: center;
   background: #0d0d0f;
@@ -784,6 +797,14 @@ input {
 .player-aux-button {
   height: 21px;
   width: 21px;
+}
+
+.player-shuffle-button.is-loading {
+  animation: player-control-glow 920ms ease-in-out infinite;
+}
+
+.player-shuffle-button.is-loading:hover {
+  color: #ffffff;
 }
 
 .player-play-button {

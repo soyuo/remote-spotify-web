@@ -320,6 +320,17 @@ function findQueueItem(value: unknown) {
   return queueItems.find((item) => item.queueId === queueId) ?? null;
 }
 
+function shuffleQueueItems(items: QueueItem[]) {
+  const shuffledItems = [...items];
+
+  for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledItems[index], shuffledItems[swapIndex]] = [shuffledItems[swapIndex], shuffledItems[index]];
+  }
+
+  return shuffledItems;
+}
+
 export function createApiServer(): express.Application {
   const app = express();
 
@@ -431,6 +442,12 @@ export function createApiServer(): express.Application {
     }
 
     queueItems = queueItems.filter((queueItem) => queueItem.queueId !== item.queueId);
+    broadcastQueue(true);
+    response.json({ ok: true, items: queueItems });
+  });
+
+  app.post("/api/shuffle", (_request, response) => {
+    queueItems = shuffleQueueItems(queueItems);
     broadcastQueue(true);
     response.json({ ok: true, items: queueItems });
   });
