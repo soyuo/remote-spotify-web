@@ -190,14 +190,32 @@ function broadcastQueue(force = true) {
   }
 }
 
-async function playQueueItem(item: QueueItem, removeFromQueue: boolean) {
+async function playQueueItem(item: QueueItem) {
   await playTrack(item.playId);
+  setCurrentQueueItem(item);
+  return refreshPlayerSnapshot(350);
+}
 
-  if (removeFromQueue) {
-    queueItems = queueItems.filter((queueItem) => queueItem.queueId !== item.queueId);
-    broadcastQueue(true);
+async function playNextQueueItem() {
+  if (!queueItems.length) {
+    await nextTrack();
+    const snapshot = await refreshPlayerSnapshot(350);
+    setCurrentTrackFromSnapshot(snapshot);
+    return snapshot;
   }
 
+  const nextQueuedTrack = queueItems[1];
+  queueItems = queueItems.slice(1);
+  broadcastQueue(true);
+
+  if (!nextQueuedTrack) {
+    await nextTrack();
+    const snapshot = await refreshPlayerSnapshot(350);
+    setCurrentTrackFromSnapshot(snapshot);
+    return snapshot;
+  }
+
+  await playTrack(nextQueuedTrack.playId);
   return refreshPlayerSnapshot(350);
 }
 
@@ -224,42 +242,22 @@ function stoppedAtEnd(previousSnapshot: PlayerSnapshot, nextSnapshot: PlayerSnap
 }
 
 async function maybePlayNextQueuedTrack(previousSnapshot: PlayerSnapshot, nextSnapshot: PlayerSnapshot) {
-  if (!queueItems.length || !stoppedAtEnd(previousSnapshot, nextSnapshot)) {
+  if (queueItems.length < 2 || !stoppedAtEnd(previousSnapshot, nextSnapshot)) {
     return nextSnapshot;
   }
 
-  const [nextQueuedTrack] = queueItems;
-  return playQueueItem(nextQueuedTrack, true);
-}
-
-function shouldUseQueuedTrackAfterNext(previousSnapshot: PlayerSnapshot, nextSnapshot: PlayerSnapshot) {
-  if (!queueItems.length) {
-    return false;
-  }
-
-  if (!nextSnapshot.track) {
-    return true;
-  }
-
-  if (!previousSnapshot.track) {
-    return false;
-  }
-
-  return previousSnapshot.track.id === nextSnapshot.track.id;
+  return playNextQueueItem();
 }
 
 async function playSpotifyNextOrQueuedTrack() {
-  const previousSnapshot = playerSnapshot;
-
-  await nextTrack();
-  const nextSnapshot = await refreshPlayerSnapshot(350);
-
-  if (!shouldUseQueuedTrackAfterNext(previousSnapshot, nextSnapshot)) {
-    return nextSnapshot;
+  if (queueItems.length) {
+    return playNextQueueItem();
   }
 
-  const [nextQueuedTrack] = queueItems;
-  return playQueueItem(nextQueuedTrack, true);
+  await nextTrack();
+  const snapshot = await refreshPlayerSnapshot(350);
+  setCurrentTrackFromSnapshot(snapshot);
+  return snapshot;
 }
 
 async function refreshPlayerSnapshot(delayMs = 0) {
@@ -271,6 +269,7 @@ async function refreshPlayerSnapshot(delayMs = 0) {
   const player = await getPlaybackState();
   const nextSnapshot = toPlayerSnapshot(player as SpotifyPlayerResponse | undefined);
   playerSnapshot = await maybePlayNextQueuedTrack(previousSnapshot, nextSnapshot);
+  setCurrentTrackFromSnapshot(playerSnapshot);
   broadcastPlayer(playerSnapshot, true);
   return playerSnapshot;
 }
@@ -320,15 +319,44 @@ function findQueueItem(value: unknown) {
   return queueItems.find((item) => item.queueId === queueId) ?? null;
 }
 
+function toQueueItemFromSearchSong(song: SearchSong, queueId = crypto.randomUUID()): QueueItem {
+  return {
+    ...song,
+    queueId,
+  };
+}
+
+function setCurrentQueueItem(item: QueueItem) {
+  const currentQueueId = queueItems[0]?.queueId;
+  queueItems = [
+    item,
+    ...queueItems.filter((queueItem) => queueItem.queueId !== item.queueId && queueItem.queueId !== currentQueueId),
+  ];
+  broadcastQueue(true);
+}
+
+function setCurrentTrackFromSnapshot(snapshot: PlayerSnapshot) {
+  if (!snapshot.track) {
+    return;
+  }
+
+  if (queueItems[0]?.playId === snapshot.track.playId) {
+    return;
+  }
+
+  setCurrentQueueItem(toQueueItemFromSearchSong(snapshot.track));
+}
+
 function shuffleQueueItems(items: QueueItem[]) {
-  const shuffledItems = [...items];
+  const [currentItem, ...upcomingItems] = items;
+  const shuffledItems = [...upcomingItems];
 
   for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     [shuffledItems[index], shuffledItems[swapIndex]] = [shuffledItems[swapIndex], shuffledItems[index]];
   }
 
-  return shuffledItems;
+  return currentItem ? [currentItem, ...shuffledItems] : shuffledItems;
 }
 
 export function createApiServer(): express.Application {
@@ -411,6 +439,7 @@ export function createApiServer(): express.Application {
       return;
     }
 
+    setCurrentTrackFromSnapshot(playerSnapshot);
     queueItems = [...queueItems, item];
     broadcastQueue(true);
     response.json({ ok: true, item, items: queueItems });
@@ -425,7 +454,7 @@ export function createApiServer(): express.Application {
     }
 
     try {
-      const snapshot = await playQueueItem(item, true);
+      const snapshot = await playQueueItem(item);
       response.json({ ok: true, player: snapshot, items: queueItems });
     } catch (error) {
       console.error(error);
@@ -447,6 +476,7 @@ export function createApiServer(): express.Application {
   });
 
   app.post("/api/shuffle", (_request, response) => {
+    setCurrentTrackFromSnapshot(playerSnapshot);
     queueItems = shuffleQueueItems(queueItems);
     broadcastQueue(true);
     response.json({ ok: true, items: queueItems });
@@ -465,7 +495,8 @@ export function createApiServer(): express.Application {
     try {
       await playTrack(trackUri);
       const snapshot = await refreshPlayerSnapshot(350);
-      response.json({ ok: true, id: trackUri, player: snapshot });
+      setCurrentTrackFromSnapshot(snapshot);
+      response.json({ ok: true, id: trackUri, player: snapshot, items: queueItems });
     } catch (error) {
       console.error(error);
       response.status(500).json({ error: "spotify play failed" });
@@ -476,7 +507,7 @@ export function createApiServer(): express.Application {
     try {
       await previousTrack();
       const snapshot = await refreshPlayerSnapshot(350);
-      response.json({ ok: true, player: snapshot });
+      response.json({ ok: true, player: snapshot, items: queueItems });
     } catch (error) {
       console.error(error);
       response.status(500).json({ error: "spotify previous failed" });

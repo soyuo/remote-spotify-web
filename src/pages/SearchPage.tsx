@@ -258,6 +258,10 @@ export function SearchPage() {
       if (data.player) {
         setPlayer((currentPlayer) => reconcilePlayer(currentPlayer, data.player!));
       }
+
+      if (data.items) {
+        setQueueItems(data.items);
+      }
     } catch (error) {
       console.error(error);
       setPlayError("재생 요청에 실패했어요. Spotify 앱과 활성 기기를 확인해 주세요.");
