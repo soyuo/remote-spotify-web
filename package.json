@@ -1,0 +1,29 @@
+{
+  "name": "remote-spotify-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --experimental-strip-types scripts/dev.ts",
+    "dev:web": "vite --host 127.0.0.1",
+    "dev:api": "node --experimental-strip-types api/server.ts",
+    "api:dev": "node --experimental-strip-types api/server.ts",
+    "spotify:init": "node --experimental-strip-types install/init.ts",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "express": "^5.2.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3"
+  }
+}

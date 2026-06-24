@@ -1,0 +1,16 @@
+{
+  "clientId": "your_spotify_client_id",
+  "clientSecret": "your_spotify_client_secret",
+  "redirectUri": "http://127.0.0.1:3000/api/auth/spotify/callback",
+  "scopes": [
+    "user-read-private",
+    "user-read-email",
+    "streaming",
+    "user-read-playback-state",
+    "user-modify-playback-state"
+  ],
+  "market": "KR",
+  "authBaseUrl": "https://accounts.spotify.com/authorize",
+  "tokenUrl": "https://accounts.spotify.com/api/token",
+  "apiBaseUrl": "https://api.spotify.com/v1"
+}

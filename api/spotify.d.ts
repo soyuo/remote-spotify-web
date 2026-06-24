@@ -1,0 +1,71 @@
+export type SpotifyConfig = {
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+    scopes: string[];
+    market: string;
+    authBaseUrl: string;
+    tokenUrl: string;
+    apiBaseUrl: string;
+};
+export type SpotifyTokenStore = {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    scope: string;
+    expiresIn: number;
+    expiresAt: number;
+    savedAt: string;
+};
+export type SpotifyTrack = {
+    id: string;
+    uri: string;
+    title: string;
+    artist: string;
+    album: string;
+    durationMs: number;
+    duration: string;
+    imageUrl: string | null;
+};
+type SpotifyTokenResponse = {
+    access_token: string;
+    refresh_token?: string;
+    token_type: string;
+    scope: string;
+    expires_in: number;
+};
+export declare function readSpotifyConfig(): Promise<SpotifyConfig>;
+export declare function readSpotifyTokens(): Promise<SpotifyTokenStore>;
+export declare function writeSpotifyTokens(tokens: SpotifyTokenStore): Promise<void>;
+export declare function createTokenStore(response: SpotifyTokenResponse): {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    scope: string;
+    expiresIn: number;
+    expiresAt: number;
+    savedAt: string;
+};
+export declare function refreshAccessToken(config: SpotifyConfig, currentTokens: SpotifyTokenStore): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    scope: string;
+    expiresIn: number;
+    expiresAt: number;
+    savedAt: string;
+}>;
+export declare function getValidAccessToken(): Promise<string>;
+export declare function spotifyRequest<T>(path: string, init?: RequestInit): Promise<T>;
+export declare function searchTracks(query: string, limit?: number): Promise<SpotifyTrack[]>;
+export declare function getPlaybackState(): Promise<unknown>;
+export declare function playTrack(uri: string, deviceId?: string): Promise<unknown>;
+export declare function resumePlayback(deviceId?: string): Promise<unknown>;
+export declare function pausePlayback(deviceId?: string): Promise<unknown>;
+export declare function previousTrack(deviceId?: string): Promise<unknown>;
+export declare function nextTrack(deviceId?: string): Promise<unknown>;
+export declare function setVolume(volumePercent: number, deviceId?: string): Promise<unknown>;
+export declare function seekPlayback(positionMs: number, deviceId?: string): Promise<unknown>;
+export declare function toBasicAuth(config: Pick<SpotifyConfig, "clientId" | "clientSecret">): string;
+export declare function formatDuration(durationMs: number): string;
+export {};
