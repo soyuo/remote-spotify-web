@@ -13,9 +13,11 @@ export type PlayerTrack = {
 
 type PlayerBarProps = {
   isPlaying?: boolean;
+  isRepeatEnabled?: boolean;
   isShuffling?: boolean;
   onNext?: () => void;
   onPrevious?: () => void;
+  onRepeat?: () => void;
   onSeek?: (positionMs: number) => void;
   onShuffle?: () => void;
   onToggle?: () => void;
@@ -146,9 +148,11 @@ function VolumeIcon() {
 
 export function PlayerBar({
   isPlaying = false,
+  isRepeatEnabled = false,
   isShuffling = false,
   onNext,
   onPrevious,
+  onRepeat,
   onSeek,
   onShuffle,
   onToggle,
@@ -236,7 +240,11 @@ export function PlayerBar({
           <IconButton label="다음 곡" className="player-control-button player-next-button" onClick={onNext}>
             <NextIcon />
           </IconButton>
-          <IconButton label="반복" className="player-control-button player-aux-button" disabled>
+          <IconButton
+            label="반복"
+            className={`player-control-button player-aux-button player-repeat-button${isRepeatEnabled ? " is-active" : ""}`}
+            onClick={onRepeat}
+          >
             <RepeatIcon />
           </IconButton>
         </div>

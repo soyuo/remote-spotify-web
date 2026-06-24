@@ -48,6 +48,7 @@ type SpotifyPlayerItem =
 
 type PlayerSnapshot = {
   isPlaying: boolean;
+  repeatEnabled: boolean;
   volumePercent: number;
   progressMs: number;
   progressPercent: number;
@@ -63,8 +64,10 @@ type StreamClient = {
 
 const playerClients = new Set<StreamClient>();
 let queueItems: QueueItem[] = [];
+let repeatEnabled = false;
 let playerSnapshot: PlayerSnapshot = {
   isPlaying: false,
+  repeatEnabled,
   volumePercent: 1,
   progressMs: 0,
   progressPercent: 0,
@@ -94,6 +97,7 @@ function toPlayerSnapshot(player: SpotifyPlayerResponse | undefined): PlayerSnap
   if (!player || !isSpotifyTrackItem(player.item)) {
     return {
       isPlaying: false,
+      repeatEnabled,
       volumePercent: player?.device?.volume_percent ?? playerSnapshot.volumePercent,
       progressMs: 0,
       progressPercent: 0,
@@ -108,6 +112,7 @@ function toPlayerSnapshot(player: SpotifyPlayerResponse | undefined): PlayerSnap
 
   return {
     isPlaying: player.is_playing,
+    repeatEnabled,
     volumePercent: player.device?.volume_percent ?? playerSnapshot.volumePercent,
     progressMs,
     progressPercent: durationMs > 0 ? Math.min((progressMs / durationMs) * 100, 100) : 0,
@@ -204,12 +209,23 @@ async function playNextQueueItem() {
     return snapshot;
   }
 
+  const currentQueuedTrack = queueItems[0];
   const nextQueuedTrack = queueItems[1];
-  queueItems = queueItems.slice(1);
+
+  if (repeatEnabled) {
+    queueItems = nextQueuedTrack ? [...queueItems.slice(1), currentQueuedTrack] : [currentQueuedTrack];
+  } else {
+    queueItems = queueItems.slice(1);
+  }
+
   broadcastQueue(true);
 
   if (!nextQueuedTrack) {
-    await nextTrack();
+    if (repeatEnabled) {
+      await playTrack(currentQueuedTrack.playId);
+    } else {
+      await nextTrack();
+    }
     const snapshot = await refreshPlayerSnapshot(350);
     setCurrentTrackFromSnapshot(snapshot);
     return snapshot;
@@ -480,6 +496,17 @@ export function createApiServer(): express.Application {
     queueItems = shuffleQueueItems(queueItems);
     broadcastQueue(true);
     response.json({ ok: true, items: queueItems });
+  });
+
+  app.post("/api/repeat", (_request, response) => {
+    repeatEnabled = !repeatEnabled;
+    playerSnapshot = {
+      ...playerSnapshot,
+      repeatEnabled,
+      updatedAt: Date.now(),
+    };
+    broadcastPlayer(playerSnapshot, true);
+    response.json({ ok: true, repeatEnabled, player: playerSnapshot });
   });
 
   app.post("/api/play", async (request, response) => {

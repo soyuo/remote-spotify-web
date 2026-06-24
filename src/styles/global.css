@@ -661,6 +661,19 @@ input {
   }
 }
 
+@keyframes player-repeat-glow {
+  0%,
+  100% {
+    color: #4aa3ff;
+    filter: drop-shadow(0 0 4px rgba(74, 163, 255, 0.34));
+  }
+
+  50% {
+    color: #8fcbff;
+    filter: drop-shadow(0 0 13px rgba(74, 163, 255, 0.82));
+  }
+}
+
 .player-bar {
   align-items: center;
   background: #0d0d0f;
@@ -805,6 +818,15 @@ input {
 
 .player-shuffle-button.is-loading:hover {
   color: #ffffff;
+}
+
+.player-repeat-button.is-active {
+  animation: player-repeat-glow 1.15s ease-in-out infinite;
+  color: #4aa3ff;
+}
+
+.player-repeat-button.is-active:hover {
+  color: #8fcbff;
 }
 
 .player-play-button {

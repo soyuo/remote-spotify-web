@@ -16,6 +16,7 @@ type QueueResponse = {
 
 type PlayerResponse = {
   isPlaying: boolean;
+  repeatEnabled: boolean;
   volumePercent: number;
   progressMs: number;
   progressPercent: number;
@@ -30,6 +31,7 @@ type PlayerActionResponse = {
 
 const idlePlayer: PlayerResponse = {
   isPlaying: false,
+  repeatEnabled: false,
   volumePercent: 1,
   progressMs: 0,
   progressPercent: 0,
@@ -231,6 +233,7 @@ export function SearchPage() {
 
     const optimisticPlayer: PlayerResponse = {
       isPlaying: true,
+      repeatEnabled: player.repeatEnabled,
       volumePercent: player.volumePercent,
       progressMs: 0,
       progressPercent: 0,
@@ -272,6 +275,7 @@ export function SearchPage() {
     setPlayError("");
     setPlayer({
       isPlaying: true,
+      repeatEnabled: player.repeatEnabled,
       volumePercent: player.volumePercent,
       progressMs: 0,
       progressPercent: 0,
@@ -341,6 +345,15 @@ export function SearchPage() {
 
   function handleNext() {
     postPlayerAction("/api/play/next");
+  }
+
+  function handleRepeat() {
+    postPlayerAction("/api/repeat", {
+      ...player,
+      repeatEnabled: !player.repeatEnabled,
+      progressMs: estimateProgressMs(player),
+      updatedAt: Date.now(),
+    });
   }
 
   async function handleShuffle() {
@@ -490,9 +503,11 @@ export function SearchPage() {
       </section>
       <PlayerBar
         isPlaying={player.isPlaying}
+        isRepeatEnabled={player.repeatEnabled}
         isShuffling={isShuffling}
         onNext={handleNext}
         onPrevious={handlePrevious}
+        onRepeat={handleRepeat}
         onSeek={handleSeek}
         onShuffle={handleShuffle}
         onToggle={handleToggle}
