@@ -751,38 +751,62 @@ input {
 .player-buttons {
   align-items: center;
   display: flex;
-  gap: 22px;
+  gap: 18px;
+  justify-content: center;
 }
 
 .player-control-button {
   background: transparent;
-  color: #56565d;
-  height: 22px;
-  width: 22px;
+  color: #9c9ca3;
+  height: 24px;
+  transition:
+    color 150ms ease,
+    transform 150ms ease;
+  width: 24px;
 }
 
 .player-control-button:hover {
-  color: #74747c;
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+.player-control-button:disabled {
+  color: #9c9ca3;
+  cursor: default;
+  opacity: 1;
+}
+
+.player-control-button:disabled:hover {
+  color: #9c9ca3;
+  transform: none;
+}
+
+.player-aux-button {
+  height: 21px;
+  width: 21px;
 }
 
 .player-play-button {
-  background: #1c1c22;
-  border: 1px solid #2a2a31;
+  background: #ffffff;
+  border: 0;
   border-radius: 50%;
-  color: #56565d;
+  color: #000000;
   height: 40px;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
   width: 40px;
 }
 
 .player-bar.is-playing .player-play-button {
-  background: #d6d6db;
-  border-color: #d6d6db;
-  color: #0a0a0b;
+  background: #ffffff;
+  color: #000000;
 }
 
 .player-play-button:hover {
-  color: #74747c;
-  border-color: #34343d;
+  background: #ffffff;
+  color: #000000;
+  transform: scale(1.06);
 }
 
 .player-control-button svg,
@@ -949,7 +973,7 @@ input {
   }
 
   .player-buttons {
-    gap: 14px;
+    gap: 16px;
   }
 
   .player-progress-row {
@@ -1107,7 +1131,6 @@ input {
   }
 
   .player-buttons {
-    gap: 14px;
     grid-column: 1 / -1;
     grid-row: 1;
     height: 44px;
@@ -1124,12 +1147,28 @@ input {
     width: 20px;
   }
 
-  .player-control-button:first-child {
-    left: calc(50% - 58px);
+  .player-control-button:hover {
+    transform: translateY(-50%) scale(1.06);
   }
 
-  .player-control-button:last-child {
-    right: calc(50% - 58px);
+  .player-control-button:disabled:hover {
+    transform: translateY(-50%);
+  }
+
+  .player-aux-button:first-child {
+    left: calc(50% - 86px);
+  }
+
+  .player-previous-button {
+    left: calc(50% - 52px);
+  }
+
+  .player-next-button {
+    right: calc(50% - 52px);
+  }
+
+  .player-aux-button:last-child {
+    right: calc(50% - 86px);
   }
 
   .player-play-button {
@@ -1139,6 +1178,10 @@ input {
     top: 50%;
     transform: translate(-50%, -50%);
     width: 36px;
+  }
+
+  .player-play-button:hover {
+    transform: translate(-50%, -50%) scale(1.06);
   }
 
   .player-progress-row {
@@ -1197,12 +1240,20 @@ input {
     font-size: 11px;
   }
 
-  .player-control-button:first-child {
-    left: calc(50% - 52px);
+  .player-aux-button:first-child {
+    left: calc(50% - 78px);
   }
 
-  .player-control-button:last-child {
-    right: calc(50% - 52px);
+  .player-previous-button {
+    left: calc(50% - 48px);
+  }
+
+  .player-next-button {
+    right: calc(50% - 48px);
+  }
+
+  .player-aux-button:last-child {
+    right: calc(50% - 78px);
   }
 
   .player-volume-control {
